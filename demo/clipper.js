@@ -1,0 +1,1 @@
+../src/clipper.js
