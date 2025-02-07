@@ -6,60 +6,6 @@ Array.prototype.start = function () {
   return this[0];
 };
 
-Array.prototype.indexOfVec = function (a) {
-  let foundInteIndex_idx = -1;
-  for (let ikj = 0; ikj < this.length - 1; ikj++) {
-    if (this[ikj].x == a.x && this[ikj].y == a.y) {
-      foundInteIndex_idx = ikj;
-      break;
-    }
-  }
-  return foundInteIndex_idx;
-};
-
-Array.prototype.flexIndex = function (idx) {
-  if (idx >= 0) {
-    return this[idx % this.length];
-  } else {
-    return this[this.length - (Math.abs(idx) % this.length)];
-  }
-};
-
-function dist(...args) {
-  let y, x, z, n;
-  if (args.length == 6) {
-    x = args[3] - args[0];
-    y = args[4] - args[1];
-    z = args[5] - args[2];
-    n = Math.sqrt(x * x + y * y + z * z);
-  } else if (args.length == 4) {
-    x = args[2] - args[0];
-    y = args[3] - args[1];
-    n = Math.sqrt(x * x + y * y);
-  }
-  return n;
-}
-
-function lerp(v0, v1, v2) {
-  return v1 + (v0 - v1) * v2;
-}
-
-function Parangle(p0, p1, n1) {
-  const n2 = (-n1 / dist(p0.x, p0.y, p1.x, p1.y)) * 1.4143;
-  const n3 = 1;
-
-  return [
-    {
-      x: parseFloat(lerp(p0.x, p1.x, n2).toFixed(n3)),
-      y: parseFloat(lerp(p0.y, p1.y, n2).toFixed(n3)),
-    },
-    {
-      x: parseFloat(lerp(p0.x, p1.x, 1 - n2).toFixed(n3)),
-      y: parseFloat(lerp(p0.y, p1.y, 1 - n2).toFixed(n3)),
-    },
-  ];
-}
-
 function vector(x, y) {
   this.x = x;
   this.y = y;
@@ -144,48 +90,109 @@ function linesToPoints(path) {
   return lines;
 }
 
-function isPointInsidePolygon(point, polygon) {
-  function angleBetween(p1, p2, p3) {
-    let dx1 = p1.x - p3.x,
-      dy1 = p1.y - p3.y;
-    let dx2 = p2.x - p3.x,
-      dy2 = p2.y - p3.y;
-    let dot = dx1 * dx2 + dy1 * dy2;
-    let det = dx1 * dy2 - dy1 * dx2;
-    return Math.atan2(det, dot);
-  }
+function Parangle(p0, p1, n1) {
+  const n2 = (-n1 / dist(p0.x, p0.y, p1.x, p1.y)) * 1.4143;
+  const n3 = 1;
 
-  let totalAngle = 0.0;
-  for (let i = 0; i < polygon.length; i++) {
-    let p1 = polygon[i];
-    let p2 = polygon[(i + 1) % polygon.length];
-
-    totalAngle += angleBetween(p1, p2, point);
-  }
-
-  return Math.abs(totalAngle) > 1e-6;
+  return [
+    {
+      x: parseFloat(lerp(p0.x, p1.x, n2).toFixed(n3)),
+      y: parseFloat(lerp(p0.y, p1.y, n2).toFixed(n3)),
+    },
+    {
+      x: parseFloat(lerp(p0.x, p1.x, 1 - n2).toFixed(n3)),
+      y: parseFloat(lerp(p0.y, p1.y, 1 - n2).toFixed(n3)),
+    },
+  ];
 }
 
-function fixZeroIdx(path0, path1) {
-  if (isPointInsidePolygon(path0[0], path1)) {
-    let fistStart = 0;
+function checkPointinobj(x, y, path) {
+  let bol1 = false;
+  let bol2 = false;
+  let bol3 = false;
+  let bol4 = false;
+  let lenofLine = 100000;
 
-    for (let i = 0; i < path0.length; i++) {
-      if (!isPointInsidePolygon(path0[i], path1)) {
+  let num2 = 2;
+  let p0 = new vector(x, y);
+  let p1 = new vector(-lenofLine * 2, y - num2);
+  let p2 = new vector(lenofLine * 2, y + num2);
+  let p3 = new vector(x + num2, -lenofLine * 2);
+  let p4 = new vector(x - num2, lenofLine * 2);
+  let num1 = 0;
+
+  for (let ich = 0; ich < path.length - 1; ich++) {
+    if (
+      inteLine(Parangle(p0, p1, num1), [path[ich], path[ich + 1]]) &&
+      bol1 == false
+    ) {
+      bol1 = true;
+    } else if (
+      inteLine(Parangle(p0, p1, num1), [path[ich], path[ich + 1]]) &&
+      bol1 == true
+    ) {
+      bol1 = false;
+    }
+    if (
+      inteLine(Parangle(p0, p2, num1), [path[ich], path[ich + 1]]) &&
+      bol2 == false
+    ) {
+      bol2 = true;
+    } else if (
+      inteLine(Parangle(p0, p2, num1), [path[ich], path[ich + 1]]) &&
+      bol2 == true
+    ) {
+      bol2 = false;
+    }
+    if (
+      inteLine(Parangle(p0, p3, num1), [path[ich], path[ich + 1]]) &&
+      bol3 == false
+    ) {
+      bol3 = true;
+    } else if (
+      inteLine(Parangle(p0, p3, num1), [path[ich], path[ich + 1]]) &&
+      bol3 == true
+    ) {
+      bol3 = false;
+    }
+    if (
+      inteLine(Parangle(p0, p4, num1), [path[ich], path[ich + 1]]) &&
+      bol4 == false
+    ) {
+      bol4 = true;
+    } else if (
+      inteLine(Parangle(p0, p4, num1), [path[ich], path[ich + 1]]) &&
+      bol4 == true
+    ) {
+      bol4 = false;
+    }
+  }
+
+  return bol1 && bol2 && bol3 && bol4;
+}
+
+function fixZeroIdx(paths0, paths1) {
+  if (checkPointinobj(paths0[0].x, paths0[0].y, paths1)) {
+    let fistStart;
+
+    for (let i = 0; i < paths0.length; i++) {
+      if (!checkPointinobj(paths0[i].x, paths0[i].y, paths1)) {
         fistStart = i;
         break;
       }
     }
-    return sortVec(path0, fistStart + 1);
+
+    return sortVec(paths0, fistStart + 1);
   } else {
-    return path0;
+    return paths0;
   }
 }
 
 function sortVec(a, fistStart) {
   let tempSortArr = [];
-  for (let b = 0; b < a.length; b++) {
-    tempSortArr.push(a[(b + fistStart) % a.length]);
+
+  for (let i = 0; i < a.length; i++) {
+    tempSortArr.push(a[(i + fistStart) % a.length]);
   }
   return tempSortArr;
 }
@@ -213,31 +220,35 @@ function sortIdx(n0, n1) {
   });
 }
 
+function shapeClliper(path) {
+  path = clearRepPoints(path);
+  path = closePath(path);
+  return path;
+}
+
+function lineClliper(path) {
+  path = clearRepPoints(path);
+  return path;
+}
+
 function removeDupInte(a, b) {
   return a[2].x != b[2].x || a[2].y != b[2].y;
 }
 
-function isCounterClockwise(vertices) {
-  let sum = 0;
-  for (let i = 0; i < vertices.length; i++) {
-    let { x: x1, y: y1 } = vertices[i];
-    let { x: x2, y: y2 } = vertices[(i + 1) % vertices.length];
-    sum += (x2 - x1) * (y2 + y1);
+Array.prototype.indexOfVec = function (a) {
+  let foundInteIndex_idx = -1;
+  for (let ikj = 0; ikj < this.length - 1; ikj++) {
+    if (this[ikj].x == a.x && this[ikj].y == a.y) {
+      foundInteIndex_idx = ikj;
+      break;
+    }
   }
-  return sum < 0;
-}
+  return foundInteIndex_idx;
+};
 
-function ensureCounterClockwise(vertices) {
-  if (!isCounterClockwise(vertices)) {
-    return vertices.reverse();
-  }
-  return vertices;
-}
-
-function fixDirectionPath(mainShape, secondShape) {
+function reversePath(mainShape, secondShape) {
   let indexOfStartPath1;
   let indexOfEndPath1;
-
   for (let a = 0; a < mainShape.length - 1; a++) {
     for (let b = 0; b < secondShape.length - 1; b++) {
       let p = inteLine(
@@ -263,26 +274,14 @@ function fixDirectionPath(mainShape, secondShape) {
   if (
     indexOfStartPath1 &&
     indexOfEndPath1 &&
-    indexOfStartPath1.idx >= indexOfEndPath1.idx
+    indexOfStartPath1.idx > indexOfEndPath1.idx
   ) {
     secondShape.reverse();
   }
 }
 
-function shapeClipper(path) {
-  path = clearRepPoints(path);
-  path = closePath(path);
-  return path;
-}
-
-function lineClipper(path) {
-  path = clearRepPoints(path);
-  return path;
-}
-
-function clipper(p0, p1) {
-  let path0 = [...p0];
-  let path1 = [...p1];
+function shapeCutter(path0, path1) {
+  stroke(0);
 
   if (path0.start() == path0.end() && path1.start() == path1.end()) {
     path0 = fixZeroIdx(path0, path1);
@@ -290,21 +289,16 @@ function clipper(p0, p1) {
   }
 
   if (path1.start() != path1.end()) {
-    fixDirectionPath(path0, path1);
+    reversePath(path0, path1);
   }
 
   let IntePoints = [];
-  for (let a = 0; a < path1.length; a++) {
-    for (let b = 0; b < path0.length; b++) {
-      let p0 = path1.flexIndex(a);
-      let p1 = path1.flexIndex(a + 1);
-      let p2 = path0.flexIndex(b);
-      let p3 = path0.flexIndex(b + 1);
+  for (let a = 0; a < path1.length - 1; a++) {
+    for (let b = 0; b < path0.length - 1; b++) {
+      if (inteLine([path1[a], path1[a + 1]], [path0[b], path0[b + 1]])) {
+        let p = inteLine([path1[a], path1[a + 1]], [path0[b], path0[b + 1]]);
 
-      if (inteLine([p0, p1], [p2, p3])) {
-        let p = inteLine([p0, p1], [p2, p3]);
-    
-        IntePoint = [[p0, p1], [p2, p3], p];
+        IntePoint = [[path1[a], path1[a + 1]], [path0[b], path0[b + 1]], p];
 
         if (IntePoints.length > 0) {
           let bol = true;
@@ -336,22 +330,16 @@ function clipper(p0, p1) {
   let scondShape;
 
   if (IntePoints.length < 2) {
-    return [];
+    return;
   }
 
-  if (IntePoints.length % 2 == 1) {
-    IntePoints.pop();
-  }
-
- 
   for (let i = 0; i < IntePoints.length; i += 2) {
- 
     let mainIdx, scondIdx;
     let currentShape;
 
     shapes_cutted.forEach((es) => {
       let p0 = IntePoints[i][1][0];
-      let p1 = IntePoints.flexIndex(i + 1)[1][0];
+      let p1 = IntePoints[i + 1][1][0];
 
       if (es.indexOf(p0) > -1 && es.indexOf(p1) > -1) {
         currentShape = es;
@@ -365,19 +353,19 @@ function clipper(p0, p1) {
     }
 
     let p0 = IntePoints[i][0][0];
-    let p1 = IntePoints.flexIndex(i + 1)[0][0];
+    let p1 = IntePoints[i + 1][0][0];
 
     scondIdx = sortIdx(path1.indexOfVec(p0), path1.indexOfVec(p1));
     scondShape = path1.slice(scondIdx[0] + 1, scondIdx[1] + 1);
 
     scondShape.unshift(IntePoints[i][2]);
 
-    scondShape.push(IntePoints.flexIndex(i + 1)[2]);
+    scondShape.push(IntePoints[i + 1][2]);
 
-    fixDirectionPath(currentShape, scondShape);
+    reversePath(currentShape, scondShape);
 
     p0 = IntePoints[i][1][0];
-    p1 = IntePoints.flexIndex(i + 1)[1][0];
+    p1 = IntePoints[i + 1][1][0];
 
     mainIdx = sortIdx(currentShape.indexOfVec(p0), currentShape.indexOfVec(p1));
 

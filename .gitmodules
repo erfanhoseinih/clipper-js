@@ -1,0 +1,6 @@
+[submodule "demo/canvyse"]
+	path = demo/canvyse
+	url = git@github.com:erfanhoseinih/canvyse.git
+[submodule "demo/shapes-kit-js"]
+	path = demo/shapes-kit-js
+	url = git@github.com:erfanhoseinih/shapes-kit-js.git
