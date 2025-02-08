@@ -9,6 +9,7 @@ function main() {
   ctx = canvas.createCanvasContext(500, 500);
 
   ctx.background(200, 200, 200);
+ 
 
   shapeskit = new ShapesKit();
 
@@ -26,7 +27,7 @@ function main() {
     ctx.closePath();
   });
 
-  let result = clipper(shapeClipper(shape[0]), shapeClipper(shape[1]));
+  let result = clipper.clip(clipper.initShape(shape[0]), clipper.initShape(shape[1]));
   for (let i = 0; i < 10; i++) {
     colors.push([
       Math.random() * 250,
